@@ -13,7 +13,7 @@ namespace _8_tile
             this.tiles = tiles ?? throw new ArgumentNullException(nameof(tiles));
         }
 
-        public Move[] GenerateLegalMoves()
+        public Move[] GenerateCurrentBoardStateLegalMoves()
         {
             List<Move> moves = new List<Move>();
 
@@ -21,7 +21,7 @@ namespace _8_tile
             {
                 for (int cell = 0; cell < tiles.GetLength(1); cell++)
                 {
-                    foreach(Move M in GetLegalMoves(row, cell))
+                    foreach(Move M in GetLegalMovesForTile(row, cell))
                     {
                         if (!moves.Contains(M)) moves.Add(M);
                     }
@@ -30,7 +30,7 @@ namespace _8_tile
             return moves.ToArray();
         }
 
-        private Move[] GetLegalMoves(int row, int cell)
+        private Move[] GetLegalMovesForTile(int row, int cell)
         {
             List<Move> moves = new List<Move>();
   
@@ -56,7 +56,7 @@ namespace _8_tile
             return moves.ToArray();
         }
 
-        private int CalculateCellValue(int row, int cell, int number)
+        private int CalculateTileValue(int row, int cell, int number)
         {
             Dictionary<int, int[]> positionDictionary = new Dictionary<int, int[]>()
             {
@@ -70,12 +70,11 @@ namespace _8_tile
                 {8, new int[]{2,1}}
             };
 
-            int[] myFinalPosition = positionDictionary[number];
-            int deltaX = Math.Abs(myFinalPosition[1] - cell);
-            int deltaY = Math.Abs(myFinalPosition[0] - row);
+            int[] myDesiredPosition = positionDictionary[number];
+            int deltaX = Math.Abs(myDesiredPosition[1] - cell);
+            int deltaY = Math.Abs(myDesiredPosition[0] - row);
             return deltaX + deltaY;
         }
-
 
         public int CalculateBoardValue()
         {
@@ -85,19 +84,18 @@ namespace _8_tile
                 for (int cell = 0; cell < tiles.GetLength(1); cell++)
                 {
                     if (tiles[row,cell] == 0) continue;
-                    boardValue += CalculateCellValue(row, cell, tiles[row,cell]);
+                    boardValue += CalculateTileValue(row, cell, tiles[row,cell]);
                 }
             }
             return boardValue;
         }
 
-
-        public Board ExecuteMove(Move M)
+        public Board GenerateBoardByExecutingMove(Move M)
         {
-            int row = M.row;
-            int cell = M.cell;
+            int row = M.tileRow;
+            int cell = M.tileCell;
 
-            Move.DIRECTION direction = M.dir;
+            Move.DIRECTION direction = M.Direction;
 
             int targetRow = 0;
             int targetCell = 0;
@@ -134,7 +132,39 @@ namespace _8_tile
             return B;
         }
 
+        public string RowToString(int row)
+        {
+            string s = "[";
+            for(int cell = 0; cell < tiles.GetLength(1);  cell++)
+            {
+                if(tiles[row, cell] == 0)
+                {
+                    s += " ";
+                }
+                else
+                {
+                    s += tiles[row, cell];
+                }
+            }
 
+            s += "]";
+            return s;
+        }
+
+        public static string BoardArrayToString(Board[] boards, string extra = "")
+        {
+            string s = "";
+            for (int i = 0; i < 3; i++)
+            {
+                foreach(Board B in boards)
+                {
+                    s += B.RowToString(i);
+                    s += " ";
+                }
+                s += '\n';
+            }
+            return s;
+        }
 
         public override string ToString()
         {
@@ -159,42 +189,6 @@ namespace _8_tile
             return s;
         }
 
-        public string RowToString(int row)
-        {
-            string s = "[";
-            for(int cell = 0; cell < tiles.GetLength(1);  cell++)
-            {
-                if(tiles[row, cell] == 0)
-                {
-                    s += " ";
-                }
-                else
-                {
-                    s += tiles[row, cell];
-                }
-            }
-
-            s += "]";
-            return s;
-        }
-
-
-
-        public static string BoardArrayToString(Board[] boards, string extra = "")
-        {
-            string s = "";
-            for (int i = 0; i < 3; i++)
-            {
-                foreach(Board B in boards)
-                {
-                    s += B.RowToString(i);
-                    s += " ";
-                }
-                s += '\n';
-            }
-            return s;
-        }
-
         public override bool Equals(object obj)
         {
             Board other = obj as Board;
@@ -202,6 +196,7 @@ namespace _8_tile
 
 
         }
+
         public override int GetHashCode()
         {
             return this.ToString().GetHashCode();
@@ -214,25 +209,25 @@ namespace _8_tile
         public enum DIRECTION
         { UP, DOWN, LEFT, RIGHT }
 
-        public int row, cell;
-        public DIRECTION dir;
+        public int tileRow, tileCell;
+        public DIRECTION Direction;
 
         public Move(int row, int cell, DIRECTION dir)
         {
-            this.row = row;
-            this.cell = cell;
-            this.dir = dir;
+            this.tileRow = row;
+            this.tileCell = cell;
+            this.Direction = dir;
         }
 
         public override string ToString()
         {
-            return string.Format("[{0},{1}] : {2}", row, cell, dir.ToString());
+            return string.Format("[{0},{1}] : {2}", tileRow, tileCell, Direction.ToString());
         }
 
         public string ToString(Board B)
         {
             string directionString;
-            switch (dir)
+            switch (Direction)
             {
                 case DIRECTION.UP:
                     directionString = "up";
@@ -250,9 +245,7 @@ namespace _8_tile
                     directionString = "";
                     break;
             }
-
-
-            return string.Format("{0} {1}", B.tiles[row, cell], directionString);
+            return string.Format("{0} {1}", B.tiles[tileRow, tileCell], directionString);
         }
 
 
