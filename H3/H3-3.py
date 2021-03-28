@@ -1,15 +1,24 @@
 import random, math, time
 
 def fitness(gene):
-    A = gene[0]
-    B = gene[1]
-    C = gene[2]
-    D = gene[3]
-    return math.fabs((5*A+2*B-7*+4*D)-78)
+    v = calculate(gene)
+    best = 78
 
-def createGene():
+    if v > best:
+        return v - best
+    elif best > v:
+        return best - v
+    else:
+        return 0
+
+
+
+def calculate(gene):
+    return 5*gene[0]+2*gene[1]-7*gene[2]+4*gene[3]
+
+def createGene(k=4):
     numbers = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
-    return random.choices(numbers,k=4)
+    return random.choices(numbers,k=k)
 
 def createPopulation(n):
     population = list()
@@ -23,8 +32,6 @@ def populationFitness(genes):
     for g in genes:
         pop_fitness += fitness(g)
     return pop_fitness/n
-
-
 
 
 def ranked(gene):
@@ -49,7 +56,7 @@ def minGene(genes):
             minGene = g
     return minGene
 
-def tourney_selection(population, k=5):
+def tourney_selection(population, k=3):
     attendees = random.sample(population, k=k)
     return minGene(attendees)
 
@@ -89,15 +96,15 @@ def mutate(population, pM):
 
 
 n = 16
-p_Crossover = 0.8
-p_Mutation = 0.01
+p_Crossover = 0.7
+p_Mutation = 0.001
 
-iter = 50000
+iter = 10000
 
 population = createPopulation(n)
 print(rankedList(population))
 print('Initial population-wide fitness:', populationFitness(population))
-print('Best gene:', minGene(population), fitness(minGene(population)))
+print('Best gene:', ranked(minGene(population)), 'solved:', calculate((minGene((population)))))
 
 for i in range(iter):
     new_population = list()
@@ -107,8 +114,14 @@ for i in range(iter):
         new_population.append(child_2)
 
     new_population = mutate(new_population, p_Mutation)
+
+    pf = populationFitness((new_population))
+    if pf == 0:
+        print('Solved! Exiting at iteration', i)
+        break
+
     population = new_population
 
-print(rankedList(new_population))
+print('N:', len(new_population), ':', rankedList(new_population))
 print('Final population-wide fitness:', populationFitness(new_population))
-print('Best gene:', ranked(minGene(new_population)))
+print('Best gene:', ranked(minGene(new_population)), 'solved:', calculate((minGene((new_population)))))
