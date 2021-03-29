@@ -105,20 +105,25 @@ def mutate(population, pM):
 
 
 
-n = 16
+
+population_size = 16
 p_Crossover = 0.7
 p_Mutation = 0.001
 
-iter = 10000
+iteration_limit = 10000
 
-population = createPopulation(n)
+print("Searching for values A,B,C & D")
+print("that fulfill:")
+print("5A+2B-7C+4D = 78", '\n')
+
+population = createPopulation(population_size)
 print(rankedList(population))
 print('Initial population-wide fitness:', populationFitness(population))
-print('Best gene:', ranked(minGene(population)), 'solved:', calculate((minGene((population)))))
+print('Best gene:', ranked(minGene(population)), 'solved:', calculate((minGene((population)))), '\n')
 
-for i in range(iter):
+for i in range(iteration_limit):
     new_population = list()
-    while(len(new_population) < n):
+    while(len(new_population) < population_size):
         child_1, child_2 = crossOver(population, p_Crossover)
         new_population.append(child_1)
         new_population.append(child_2)
@@ -132,6 +137,6 @@ for i in range(iter):
 
     population = new_population
 
-print('N:', len(new_population), ':', rankedList(new_population))
+print(rankedList(new_population))
 print('Final population-wide fitness:', populationFitness(new_population))
 print('Best gene:', ranked(minGene(new_population)), 'solved:', calculate((minGene((new_population)))))
