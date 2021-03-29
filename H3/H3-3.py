@@ -1,5 +1,6 @@
 import random, math, time
 
+# evaluate gene distance from given value 78
 def fitness(gene):
     v = calculate(gene)
     best = 78
@@ -11,21 +12,24 @@ def fitness(gene):
     else:
         return 0
 
-
-
+# evaluate the given expression:
+# 5A+2B-7C+4D
 def calculate(gene):
     return 5*gene[0]+2*gene[1]-7*gene[2]+4*gene[3]
 
+# gene: [A,B,C,D]
 def createGene(k=4):
     numbers = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
     return random.choices(numbers,k=k)
 
+#  population: n x [A,B,C,D]
 def createPopulation(n):
     population = list()
     for i in range(n):
         population.append(createGene())
     return population
 
+# population-wide fitness (avg)
 def populationFitness(genes):
     n = len(genes)
     pop_fitness = 0
@@ -44,7 +48,7 @@ def rankedList(genes):
     return l
 
 
-
+# "best" gene, aka lowest fitness value
 def minGene(genes):
     min = fitness(genes[0])
     minGene = genes[0]
@@ -56,11 +60,15 @@ def minGene(genes):
             minGene = g
     return minGene
 
+# select k random genes, return best of selected
 def tourney_selection(population, k=3):
     attendees = random.sample(population, k=k)
     return minGene(attendees)
 
-
+# crossOver:
+# tourney-select 2 parents
+# crossBreed / pass genes forward based on
+# pC = "probability of crossOver"
 def crossOver(population, pC):
     parent_1 = tourney_selection(population)
     parent_2 = tourney_selection(population)
@@ -78,11 +86,15 @@ def crossOver(population, pC):
         child_2 = crossBreed(parent_2, parent_1)
     return child_1, child_2
 
+# splice together a&b at random index
 def crossBreed(a,b):
     i = random.randint(1, 2)
     child = a[:i]+b[i:]
     return child
 
+# apply mutations to population based on
+# pM = "probability of mutation"
+# mutation : randomize randomly selected chromosome (A-D)
 def mutate(population, pM):
     for p in population:
         if random.random() < pM:
@@ -90,8 +102,6 @@ def mutate(population, pM):
             p[i_1] = random.randint(1,19)
 
     return population
-
-
 
 
 
